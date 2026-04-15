@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/*
+ * Theme
+ *
+ * Central place to customize the app's look. Override Tailwind's
+ * default theme values here. All views and components use Tailwind
+ * utility classes, so changing a value here updates the entire app.
+ *
+ * Docs: https://tailwindcss.com/docs/theme
+ */
+
+@theme {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+
+  --color-accent: #6366f1;
+  --color-accent-hover: #4f46e5;
+
+  --color-surface: #f9fafb;
+  --color-surface-dark: #1f2937;
+}
+
+/* ── Base layer: bare-element defaults ── */
+@layer base {
+  body {
+    @apply text-gray-600 bg-white antialiased;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      @apply text-gray-400 bg-gray-900;
+    }
+  }
+}

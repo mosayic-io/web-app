@@ -12,83 +12,23 @@ async function handleSignOut() {
 </script>
 
 <template>
-  <div class="layout">
-    <nav class="navbar">
-      <div class="nav-brand">Web App</div>
-      <div class="nav-right">
-        <span class="nav-email">{{ auth.user?.email }}</span>
-        <button class="btn-sign-out" @click="handleSignOut">Sign Out</button>
+  <div class="min-h-screen flex flex-col">
+    <nav class="flex items-center justify-between px-6 h-14 border-b border-gray-200 dark:border-gray-700 shrink-0">
+      <div class="font-semibold text-lg text-gray-900 dark:text-gray-100">Web App</div>
+      <div class="flex items-center gap-4">
+        <span class="text-sm text-gray-500">{{ auth.user?.email }}</span>
+        <button
+          class="px-3 py-1.5 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-400 transition"
+          @click="handleSignOut"
+        >
+          Sign Out
+        </button>
       </div>
     </nav>
 
-    <main class="content">
-      <h1>Home</h1>
-      <p>You're signed in. Start building from here.</p>
+    <main class="flex-1 flex flex-col items-center justify-center p-12 gap-3">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">Home</h1>
+      <p class="text-gray-500">You're signed in. Start building from here.</p>
     </main>
   </div>
 </template>
-
-<style scoped>
-.layout {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  height: 56px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.nav-brand {
-  font-weight: 600;
-  font-size: 17px;
-  color: var(--text-h);
-}
-
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.nav-email {
-  font-size: 14px;
-  color: var(--text);
-}
-
-.btn-sign-out {
-  padding: 6px 14px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text-h);
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.btn-sign-out:hover {
-  background: var(--hover-bg);
-  border-color: var(--text);
-}
-
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 24px;
-  gap: 12px;
-}
-
-.content h1 {
-  font-size: 2rem;
-}
-</style>

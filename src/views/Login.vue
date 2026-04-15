@@ -54,33 +54,63 @@ async function handleGoogleSignIn() {
 </script>
 
 <template>
-  <div class="login-page">
-    <div class="login-card">
-      <h1>{{ isSignUp ? 'Create Account' : 'Welcome Back' }}</h1>
-      <p class="subtitle">{{ isSignUp ? 'Sign up to get started' : 'Sign in to your account' }}</p>
+  <div class="flex items-center justify-center min-h-screen p-6">
+    <div class="w-full max-w-sm">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+        {{ isSignUp ? 'Create Account' : 'Welcome Back' }}
+      </h1>
+      <p class="text-gray-500 mb-7">
+        {{ isSignUp ? 'Sign up to get started' : 'Sign in to your account' }}
+      </p>
 
-      <form @submit.prevent="handleSubmit">
-        <div class="field">
-          <label for="email">Email</label>
-          <input id="email" v-model="email" type="email" placeholder="you@example.com" required autocomplete="email" />
+      <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
+        <div class="flex flex-col text-left">
+          <label for="email" class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Email</label>
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            placeholder="you@example.com"
+            required
+            autocomplete="email"
+            class="w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:border-accent focus:ring-3 focus:ring-accent/20 transition"
+          />
         </div>
 
-        <div class="field">
-          <label for="password">Password</label>
-          <input id="password" v-model="password" type="password" placeholder="Your password" required autocomplete="current-password" />
+        <div class="flex flex-col text-left">
+          <label for="password" class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Password</label>
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            placeholder="Your password"
+            required
+            autocomplete="current-password"
+            class="w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:border-accent focus:ring-3 focus:ring-accent/20 transition"
+          />
         </div>
 
-        <button type="submit" class="btn btn-primary" :disabled="loading">
+        <button
+          type="submit"
+          :disabled="loading"
+          class="w-full py-2.5 px-4 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-hover transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           {{ loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In') }}
         </button>
       </form>
 
-      <div class="divider">
+      <div class="flex items-center gap-4 my-6 text-xs text-gray-400 uppercase tracking-wide">
+        <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
         <span>or</span>
+        <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
       </div>
 
-      <button class="btn btn-google" :disabled="googleLoading" @click="handleGoogleSignIn">
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <button
+        :disabled="googleLoading"
+        class="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 text-sm font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        @click="handleGoogleSignIn"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" class="shrink-0" aria-hidden="true">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -89,183 +119,19 @@ async function handleGoogleSignIn() {
         {{ googleLoading ? 'Redirecting...' : 'Continue with Google' }}
       </button>
 
-      <p v-if="error" class="message error">{{ error }}</p>
-      <p v-if="warning" class="message warning">{{ warning }}</p>
+      <p v-if="error" class="mt-4 px-3 py-2.5 text-sm rounded-lg text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+        {{ error }}
+      </p>
+      <p v-if="warning" class="mt-4 px-3 py-2.5 text-sm rounded-lg text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+        {{ warning }}
+      </p>
 
-      <p class="toggle">
+      <p class="text-sm text-center mt-6">
         {{ isSignUp ? 'Already have an account?' : "Don't have an account?" }}
-        <a href="#" @click.prevent="isSignUp = !isSignUp; error = ''; warning = ''">
+        <a href="#" class="text-accent font-medium hover:underline" @click.prevent="isSignUp = !isSignUp; error = ''; warning = ''">
           {{ isSignUp ? 'Sign In' : 'Sign Up' }}
         </a>
       </p>
     </div>
   </div>
 </template>
-
-<style scoped>
-.login-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 24px;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 400px;
-}
-
-h1 {
-  font-size: 1.75rem;
-  margin: 0 0 4px;
-}
-
-.subtitle {
-  color: var(--text);
-  margin-bottom: 28px;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  text-align: left;
-}
-
-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-input {
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 15px;
-  background: var(--bg);
-  color: var(--text-h);
-  transition: border-color 0.15s;
-}
-
-input::placeholder {
-  color: var(--text);
-  opacity: 0.5;
-}
-
-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-ring);
-}
-
-.btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--accent-hover);
-}
-
-.btn-google {
-  background: var(--bg);
-  color: var(--text-h);
-  border: 1px solid var(--border);
-}
-
-.btn-google:hover:not(:disabled) {
-  background: var(--hover-bg);
-  border-color: var(--text);
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin: 24px 0;
-  color: var(--text);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-.message {
-  font-size: 14px;
-  line-height: 1.4;
-  padding: 10px 12px;
-  border-radius: 8px;
-  margin-top: 16px;
-}
-
-.error {
-  color: #dc2626;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-}
-
-.warning {
-  color: #a16207;
-  background: #fefce8;
-  border: 1px solid #fde68a;
-}
-
-@media (prefers-color-scheme: dark) {
-  .error {
-    color: #fca5a5;
-    background: rgba(220, 38, 38, 0.1);
-    border-color: rgba(220, 38, 38, 0.3);
-  }
-  .warning {
-    color: #fcd34d;
-    background: rgba(161, 98, 7, 0.1);
-    border-color: rgba(161, 98, 7, 0.3);
-  }
-}
-
-.toggle {
-  margin-top: 20px;
-  font-size: 14px;
-  text-align: center;
-}
-
-.toggle a {
-  color: var(--accent);
-  font-weight: 500;
-}
-</style>
