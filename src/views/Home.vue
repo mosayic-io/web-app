@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -13,7 +13,9 @@ async function handleSignOut() {
 
 <template>
   <div class="min-h-screen flex flex-col">
-    <nav class="flex items-center justify-between px-6 h-14 border-b border-gray-200 dark:border-gray-700 shrink-0">
+    <nav
+      class="flex items-center justify-between px-6 h-14 border-b border-gray-200 dark:border-gray-700 shrink-0"
+    >
       <div class="font-semibold text-lg text-gray-900 dark:text-gray-100">Web App</div>
       <div class="flex items-center gap-4">
         <span class="text-sm text-gray-500">{{ auth.user?.email }}</span>

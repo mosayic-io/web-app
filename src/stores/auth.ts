@@ -1,12 +1,13 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { User, Session } from '@supabase/supabase-js'
-import { supabase, supabaseConfigured } from '../lib/supabase'
+import { supabase, supabaseConfigured } from '@/lib/supabase'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const session = ref<Session | null>(null)
   const loading = ref(true)
+  const initError = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!user.value)
 
@@ -16,15 +17,22 @@ export const useAuthStore = defineStore('auth', () => {
       return
     }
 
-    const { data } = await supabase.auth.getSession()
-    session.value = data.session
-    user.value = data.session?.user ?? null
-    loading.value = false
+    try {
+      const { data, error } = await supabase.auth.getSession()
+      if (error) throw error
+      session.value = data.session
+      user.value = data.session?.user ?? null
 
-    supabase.auth.onAuthStateChange((_event, newSession) => {
-      session.value = newSession
-      user.value = newSession?.user ?? null
-    })
+      supabase.auth.onAuthStateChange((_event, newSession) => {
+        session.value = newSession
+        user.value = newSession?.user ?? null
+      })
+    } catch (e) {
+      initError.value = e instanceof Error ? e.message : String(e)
+      console.error('[auth] failed to initialize session:', e)
+    } finally {
+      loading.value = false
+    }
   }
 
   async function signIn(email: string, password: string) {
@@ -52,5 +60,16 @@ export const useAuthStore = defineStore('auth', () => {
     if (error) throw error
   }
 
-  return { user, session, loading, isAuthenticated, initialize, signIn, signUp, signInWithGoogle, signOut }
+  return {
+    user,
+    session,
+    loading,
+    initError,
+    isAuthenticated,
+    initialize,
+    signIn,
+    signUp,
+    signInWithGoogle,
+    signOut,
+  }
 })

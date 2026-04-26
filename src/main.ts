@@ -6,12 +6,15 @@ import App from './App.vue'
 import './styles/theme.css'
 
 const app = createApp(App)
-const pinia = createPinia()
-
-app.use(pinia)
+app.use(createPinia())
 
 const auth = useAuthStore()
-auth.initialize().then(() => {
+
+// Initialize auth before mounting so the first route guard sees the
+// correct session state. Errors here (network, CORS, misconfigured env)
+// must not block the app from mounting -- otherwise the user sees a
+// blank screen with no clue what went wrong.
+auth.initialize().finally(() => {
   app.use(router)
   app.mount('#app')
 })

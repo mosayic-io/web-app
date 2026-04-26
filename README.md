@@ -1,6 +1,6 @@
 # Web App Template
 
-A Vue 3 + Vite + TypeScript SPA template with Tailwind CSS, Supabase auth, and a database access layer.
+A Vue 3 + Vite + TypeScript SPA template with Tailwind CSS, Supabase auth, a database access layer, and an HTTP client for talking to a backend API.
 
 ## Quick Start
 
@@ -16,16 +16,18 @@ npm run dev
 |---|---|
 | `VITE_SUPABASE_URL` | Your Supabase project URL |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Your Supabase publishable key |
+| `VITE_API_URL` | Base URL of the backend API (defaults to `http://localhost:8080`) |
 
 ## Project Structure
 
 ```
 src/
   components/
-    ui/                  # Reusable UI components
+    ui/                  # Reusable UI components (Button.vue is a sample)
   lib/
     supabase.ts          # Supabase client
-    db.ts                # Database access layer
+    db.ts                # Database access layer (Supabase)
+    api.ts               # HTTP client for the backend API
   router/
     index.ts             # Vue Router with auth guards
   stores/
@@ -37,7 +39,11 @@ src/
     Login.vue            # Login / signup page
   App.vue
   main.ts
+public/
+  _redirects             # SPA fallback for static hosts (Cloudflare Pages, Netlify, etc.)
 ```
+
+Imports use the `@/` alias (e.g. `import { db } from '@/lib/db'`) — `@` maps to `src/`.
 
 ## Styling
 
@@ -54,18 +60,19 @@ Views and components use Tailwind utility classes directly in templates. No cust
 
 ## Database Layer
 
-`src/lib/db.ts` provides a thin wrapper over the Supabase client for CRUD operations:
+`src/lib/db.ts` provides a thin wrapper over the Supabase client for CRUD operations. Use it for direct, RLS-protected reads and writes from the browser:
 
 ```ts
-import { db } from '../lib/db'
+import { db } from '@/lib/db'
 
 interface Post { id: string; title: string; body: string }
 
 const posts = db<Post>('posts')
 
-await posts.getAll({ column: 'created_at', order: 'desc' })
+await posts.getAll({ orderBy: 'created_at', direction: 'desc' })
 await posts.getById('some-id')
 await posts.getWhere('author_id', userId)
+await posts.findOneWhere('slug', 'hello-world')
 await posts.create({ title: 'Hello', body: 'World' })
 await posts.update('some-id', { title: 'Updated' })
 await posts.remove('some-id')
@@ -75,6 +82,40 @@ await posts.count()
 const { data } = await posts.query().select('id, title').ilike('title', '%search%')
 ```
 
+## Backend API
+
+`src/lib/api.ts` is the HTTP client for talking to a backend service (e.g. a FastAPI server). It:
+
+- Reads its base URL from `VITE_API_URL` (defaults to `http://localhost:8080`).
+- Auto-attaches the current Supabase access token as `Authorization: Bearer <token>` on every request — pass `{ auth: false }` to opt out for public endpoints.
+- Throws `ApiError` (with `status`, `statusText`, `data`, `url`) on non-2xx responses.
+
+```ts
+import { api, resource, ApiError } from '@/lib/api'
+
+// One-off calls
+const hello = await api.get<{ message: string }>('/')
+const me = await api.get<{ user_id: string }>('/protected')
+await api.post('/things', { name: 'x' })
+await api.get('/items', { params: { page: 2, q: 'foo' } })
+
+// REST resource (mirrors db() but for HTTP)
+interface Todo { id: string; title: string; done: boolean }
+const todos = resource<Todo>('/todos')
+const all = await todos.list()
+const created = await todos.create({ title: 'New' })
+
+try {
+  await api.get('/protected', { auth: false })
+} catch (e) {
+  if (e instanceof ApiError && e.status === 401) {
+    // ...
+  }
+}
+```
+
+**When to use which?** Use `db()` for reads and writes that go directly to Supabase tables (RLS-protected). Use `api()` for any custom backend logic (third-party integrations, complex aggregations, anything that needs a server secret).
+
 ## Auth
 
 The auth store (`src/stores/auth.ts`) supports:
@@ -83,6 +124,17 @@ The auth store (`src/stores/auth.ts`) supports:
 - Google OAuth (gracefully warns if not configured)
 - Persistent sessions via Supabase `onAuthStateChange`
 - Router guards (`requiresAuth`, `guestOnly`)
+- A surfaced `initError` so init failures don't silently leave the user on a blank screen
+
+## Deployment
+
+This template is built for static hosting. `npm run build` produces a `dist/` directory you can drop on any static host. The included `public/_redirects` file enables SPA fallback (so refreshing `/login` doesn't 404) on:
+
+- Cloudflare Pages
+- Netlify
+- Render
+
+For Vercel, deep-link rewrites are auto-detected for Vite SPAs — no extra config needed. For other hosts (S3, nginx), configure a fallback to `index.html` for unknown paths.
 
 ## Scripts
 
@@ -91,3 +143,5 @@ The auth store (`src/stores/auth.ts`) supports:
 | `npm run dev` | Start dev server |
 | `npm run build` | Type-check + production build |
 | `npm run preview` | Preview production build |
+| `npm run lint` | ESLint (Vue + TypeScript) |
+| `npm run format` | Prettier write |

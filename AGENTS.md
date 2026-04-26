@@ -12,14 +12,16 @@ This is a Vue 3 SPA built with Vite, TypeScript, Tailwind CSS, and Supabase. It 
 
 ```
 src/
-  components/ui/    # Reusable UI components
-  lib/              # Service layer (supabase client, db access)
+  components/ui/    # Reusable UI components (Button.vue is a sample to copy from)
+  lib/              # Service layer (Supabase client, db access, HTTP API client)
   router/           # Vue Router with auth guards
   stores/           # Pinia stores (auth)
   styles/
     theme.css       # Tailwind import + theme customization (single file)
   views/            # Page-level components
 ```
+
+Imports use the `@/` path alias, which maps to `src/`. Always prefer `import x from '@/lib/x'` over `import x from '../../lib/x'`.
 
 ## Critical Rules
 
@@ -52,13 +54,14 @@ src/
 - For database access, use the `db()` helper from `src/lib/db.ts`:
 
 ```ts
-import { db } from '../lib/db'
+import { db } from '@/lib/db'
 
 interface Todo { id: string; title: string; done: boolean }
 const todos = db<Todo>('todos')
 
-const all = await todos.getAll()
+const all = await todos.getAll({ orderBy: 'created_at', direction: 'desc' })
 const one = await todos.getById(id)
+const draft = await todos.findOneWhere('slug', 'hello-world')
 const created = await todos.create({ title: 'New' })
 await todos.update(id, { done: true })
 await todos.remove(id)
@@ -69,13 +72,50 @@ const { data } = await todos.query().select('*').eq('done', false).order('create
 
 - For new database interactions, extend the `db()` helper or use `query()` for one-off queries. Do not call `supabase.from()` directly in components.
 
+### Backend API
+
+- The HTTP client is in `src/lib/api.ts`. Use it for all calls to the backend service -- never call `fetch()` directly from components.
+- The base URL comes from `VITE_API_URL` (defaults to `http://localhost:8080`).
+- The Supabase access token is auto-attached as `Authorization: Bearer <token>` on every request. Pass `{ auth: false }` in the options to opt out for public endpoints.
+- Errors throw `ApiError` with `status`, `statusText`, `data`, and `url` for branching on response codes.
+
+```ts
+import { api, resource, ApiError } from '@/lib/api'
+
+// One-off calls
+const hello = await api.get<{ message: string }>('/')
+const me = await api.get<{ user_id: string }>('/protected')
+await api.post('/things', { name: 'x' })
+await api.get('/items', { params: { page: 2, q: 'foo' } })
+
+// REST resource (mirrors db() but for HTTP)
+interface Todo { id: string; title: string; done: boolean }
+const todos = resource<Todo>('/todos')
+const all = await todos.list()
+const created = await todos.create({ title: 'New' })
+await todos.update(id, { done: true })
+await todos.remove(id)
+```
+
+- For new endpoints, prefer `resource<T>('/path')` if it's standard REST CRUD, or `api.{get,post,...}` for one-offs. Do not introduce a second HTTP client (axios, ofetch, etc.).
+
+### When to use `db()` vs `api()`
+
+- Use `db()` for direct, RLS-protected reads and writes against Supabase tables. This is the path for most CRUD against the user's own data.
+- Use `api()` for backend logic that can't or shouldn't run in the browser: third-party integrations, anything requiring server secrets, complex aggregations, transactional flows.
+- Don't mix the two for the same resource. Pick one owner per table/endpoint.
+
 ### Auth
 
 - Auth state lives in the `useAuthStore()` Pinia store.
-- The store provides: `user`, `session`, `isAuthenticated`, `loading`, `signIn()`, `signUp()`, `signInWithGoogle()`, `signOut()`.
-- Session is initialized before the app mounts (in `main.ts`).
+- The store provides: `user`, `session`, `isAuthenticated`, `loading`, `initError`, `signIn()`, `signUp()`, `signInWithGoogle()`, `signOut()`.
+- Session is initialized before the app mounts (in `main.ts`). If init fails, `initError` is surfaced in `App.vue` so the user is never left on a blank screen.
 - Route guards are in `router/index.ts`: `meta.requiresAuth` and `meta.guestOnly`.
 - After login, navigate to `/`. After logout, navigate to `/login`.
+- Google sign-in uses Supabase's `signInWithOAuth` redirect flow. The Google OAuth
+  client ID/secret are configured in the Supabase dashboard (Authentication >
+  Providers > Google), not in `.env`. The frontend just calls `signInWithGoogle()`
+  and Supabase handles the redirect.
 
 ### Router
 
@@ -112,3 +152,5 @@ const { data } = await todos.query().select('*').eq('done', false).order('create
 - **Supabase RLS**: Remember that Supabase uses Row Level Security. If queries return empty results unexpectedly, check your RLS policies in the Supabase dashboard.
 - **Vite env vars**: Only variables prefixed with `VITE_` are exposed to client code. Never put secrets in `VITE_` variables.
 - **Tailwind v4 `@theme`**: Custom values are added in the `@theme` block, not in a `tailwind.config.js` file. Tailwind v4 does not use a JS config file.
+- **Error handling**: Catch as `unknown`, never `any`. Narrow with `instanceof Error` before reading `.message`. The template enforces this pattern in `Login.vue`.
+- **SPA fallback**: `public/_redirects` ships SPA fallback for Cloudflare Pages, Netlify, and Render. Vercel auto-detects it. For other static hosts, configure index.html fallback yourself.
