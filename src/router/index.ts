@@ -16,8 +16,17 @@ const router = createRouter({
 router.beforeEach((to) => {
   const auth = useAuthStore()
 
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+  // requiresAdmin implies requiresAuth -- an admin route needs a session first.
+  if ((to.meta.requiresAuth || to.meta.requiresAdmin) && !auth.isAuthenticated) {
     return '/login'
+  }
+  // Signed in but not an admin: send them somewhere harmless. If you turn
+  // this whole app into an admin panel (every route requiresAdmin), point
+  // this redirect at a dedicated NON-admin "no access" page instead --
+  // otherwise a non-admin bounces in a loop and the router aborts with an
+  // infinite-redirect error.
+  if (to.meta.requiresAdmin && !auth.isAdmin) {
+    return '/'
   }
   if (to.meta.guestOnly && auth.isAuthenticated) {
     return '/'

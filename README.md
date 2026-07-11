@@ -1,6 +1,6 @@
 # Web App Template
 
-A Vue 3 + Vite + TypeScript SPA template with Tailwind CSS, Supabase auth, a database access layer, and an HTTP client for talking to a backend API.
+A Vue 3 + Vite + TypeScript SPA template with Tailwind CSS, Supabase auth, a database access layer, and an HTTP client for talking to a backend API. It works for user-facing web apps and internal admin panels alike, and is built to sit beside the Kealy Studio mobile-app and Python API templates — same Supabase project, same users, same backend.
 
 ## Quick Start
 
@@ -123,8 +123,39 @@ The auth store (`src/stores/auth.ts`) supports:
 - Email/password sign-in and sign-up
 - Google OAuth (gracefully warns if not configured)
 - Persistent sessions via Supabase `onAuthStateChange`
-- Router guards (`requiresAuth`, `guestOnly`)
+- Router guards (`requiresAuth`, `requiresAdmin`, `guestOnly`)
+- An `isAdmin` flag read from the JWT (see Admin access below)
 - A surfaced `initError` so init failures don't silently leave the user on a blank screen
+
+## Admin access
+
+The template ships an admin mechanism built on Supabase's `app_metadata` — the half of user metadata that only the server can write, which makes it safe to trust in the browser.
+
+Grant the flag manually, per admin, in the Supabase SQL editor:
+
+```sql
+UPDATE auth.users
+SET raw_app_meta_data = raw_app_meta_data || '{"admin": true}'::jsonb
+WHERE email = 'admin@example.com';
+```
+
+Supabase bakes `app_metadata` into every JWT it issues, so after the admin's next token refresh (sign out and back in to force it):
+
+- `useAuthStore().isAdmin` is `true`
+- Routes marked `meta: { requiresAdmin: true }` open (non-admins are redirected to `/`)
+
+The frontend flag only hides doors — Row Level Security is the lock. Give admins real data access with RLS policies that check the same claim, e.g.:
+
+```sql
+CREATE FUNCTION public.is_admin() RETURNS boolean LANGUAGE sql STABLE AS $$
+    SELECT coalesce((auth.jwt() -> 'app_metadata' ->> 'admin')::boolean, false);
+$$;
+
+CREATE POLICY "Admins can view all rows" ON public.your_table
+    FOR SELECT TO authenticated USING (public.is_admin());
+```
+
+If this app is part of a Kealy Studio workspace, those policies belong in the API repo's `supabase/migrations/` folder — the schema lives there, not here.
 
 ## Deployment
 

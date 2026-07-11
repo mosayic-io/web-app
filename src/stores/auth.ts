@@ -11,6 +11,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!user.value)
 
+  // True when the user's JWT carries app_metadata.admin = true. Unlike
+  // user_metadata, app_metadata cannot be modified by the user -- it is set
+  // server-side (SQL editor / service role) and baked into every token, so
+  // it's safe to gate admin UI on. Pair it with is_admin() RLS policies in
+  // the database: this flag hides the door; RLS is the lock.
+  const isAdmin = computed(() => user.value?.app_metadata?.admin === true)
+
   async function initialize() {
     if (!supabaseConfigured) {
       loading.value = false
@@ -66,6 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
     loading,
     initError,
     isAuthenticated,
+    isAdmin,
     initialize,
     signIn,
     signUp,
