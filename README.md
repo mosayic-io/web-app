@@ -147,13 +147,22 @@ Supabase bakes `app_metadata` into every JWT it issues, so after the admin's nex
 The frontend flag only hides doors — Row Level Security is the lock. Give admins real data access with RLS policies that check the same claim, e.g.:
 
 ```sql
-CREATE FUNCTION public.is_admin() RETURNS boolean LANGUAGE sql STABLE AS $$
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+AS $$
     SELECT coalesce((auth.jwt() -> 'app_metadata' ->> 'admin')::boolean, false);
 $$;
+
+REVOKE ALL ON FUNCTION public.is_admin() FROM public;
+GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated, service_role;
 
 CREATE POLICY "Admins can view all rows" ON public.your_table
     FOR SELECT TO authenticated USING (public.is_admin());
 ```
+
+Two names, one idea: the claim key is `admin`, and `is_admin()` is the function that reads it — never `app_metadata.is_admin`. Keep the flag in `app_metadata` rather than a boolean column on your own `users` table, so the check stays a claim read with no lookup and means the same thing in the browser, the API, and RLS.
 
 If this app is part of a Kealy Studio workspace, those policies belong in the API repo's `supabase/migrations/` folder — the schema lives there, not here.
 

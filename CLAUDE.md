@@ -139,6 +139,7 @@ WHERE email = 'admin@example.com';
 - The claim lands in the JWT on the next token refresh -- sign out and back in to see it immediately.
 - Gate admin-only routes with `meta: { requiresAdmin: true }` (implies `requiresAuth`; signed-in non-admins are redirected to `/`).
 - **The frontend flag only hides doors -- Row Level Security is the lock.** Any data an admin should see or change needs RLS policies in the database that check the same claim, via an `is_admin()` SQL function reading `auth.jwt() -> 'app_metadata' ->> 'admin'`. Those policies are migrations, and migrations live in the API repo's `supabase/` folder (see "How this app fits the wider stack").
+- **Two names, one idea -- don't blur them.** The claim key is `admin`; `is_admin()` is the name of the SQL function that reads it. Never `app_metadata.is_admin`. And the flag belongs in `app_metadata`, never in a boolean column on your own `users` table: a claim is already in every JWT, so the check costs no lookup and works identically in the browser, the API, and RLS.
 
 ### Router
 
