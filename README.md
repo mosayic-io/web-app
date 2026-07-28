@@ -6,7 +6,7 @@ A Vue 3 + Vite + TypeScript SPA template with Tailwind CSS, Supabase auth, a dat
 
 ```bash
 npm install
-cp .env.example .env   # fill in your Supabase credentials
+mv .env.example .env   # rename it, then fill in your Supabase credentials
 npm run dev
 ```
 
