@@ -16,6 +16,14 @@ This template is designed to sit in a workspace beside a mobile app and a Python
 - Browser-side reads and writes go **directly to Supabase** (PostgREST + RLS) via `db()`. Server-side logic goes **through the Python API** via `api()`. The API validates the same Supabase JWTs this app sends.
 - **Database migrations do NOT live in this repo.** The schema is owned by the API repo (its `supabase/` folder). If a feature here needs a new table, column, or RLS policy, write the migration there -- never click it together in a dashboard.
 
+## Production is not a place you run things
+
+This app has a development backend (the Supabase running in Docker from the API repo next door) and a production one (the hosted project). You may READ production in a limited sense — check whether an environment variable exists, look at a deployment's status — and SET a secret when the user explicitly asks. You must NEVER run scripts, one-off commands or SQL against the production database, and never point a local run at it with production keys in `.env`. Schema changes reach production only as migration files in the API repo, shipped by a release. If a task seems to need production data, stop and ask.
+
+## Shipping
+
+The app deploys from its own GitHub repository through Cloudflare Pages: pushing `main` deploys it (the connection is made once in the Cloudflare dashboard). Never deploy from this machine. Before you push, `npm run build` must pass — it is exactly what Pages runs — and `npm run typecheck` / `npm run lint` where the scripts exist.
+
 ## Architecture
 
 ```
