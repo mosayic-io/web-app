@@ -3,33 +3,92 @@
 /*
  * Theme
  *
- * Central place to customize the app's look. Override Tailwind's
- * default theme values here. All views and components use Tailwind
- * utility classes, so changing a value here updates the entire app.
+ * The one place the app's look is decided. Every view uses these tokens
+ * through Tailwind classes (bg-canvas, bg-card, text-ink, text-muted,
+ * border-line, bg-accent, bg-accent-soft …), so changing a value here
+ * changes the whole app, in light and dark.
+ *
+ * Never reach for Tailwind's gray-* / slate-* / zinc-* in a view: use the
+ * tokens, and add a new one here when you need it.
  *
  * Docs: https://tailwindcss.com/docs/theme
  */
 
-@theme {
+/* Light values (the default). */
+:root {
+  --canvas: #f7f6f3; /* the page behind everything: a warm off-white */
+  --card: #ffffff; /* raised surfaces */
+  --sunken: #efede8; /* wells, tracks, hovered rows */
+  --ink: #1c1b19; /* headings and body text */
+  --muted: #6f6b63; /* secondary text */
+  --faint: #a19c92; /* hints, placeholders */
+  --line: #e6e3dc; /* hairlines and borders */
+  --accent: #4f46e5; /* the brand colour: buttons, links, ticks */
+  --accent-hover: #4338ca;
+  --accent-soft: #eceafd; /* a wash of the accent behind icons and chips */
+  --accent-ink: #ffffff; /* text on the accent */
+  --danger: #c2410c;
+  --danger-soft: #fdeee6;
+  --success: #15803d;
+  --success-soft: #e5f4ea;
+}
+
+/* Dark values, following the computer's setting. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #141413;
+    --card: #1e1d1b;
+    --sunken: #262522;
+    --ink: #f2f0eb;
+    --muted: #a8a399;
+    --faint: #6f6b63;
+    --line: #2f2d2a;
+    --accent: #8b85f5;
+    --accent-hover: #a29ef8;
+    --accent-soft: #2a2850;
+    --accent-ink: #14131f;
+    --danger: #fb923c;
+    --danger-soft: #3a2116;
+    --success: #4ade80;
+    --success-soft: #16301f;
+  }
+}
+
+@theme inline {
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Cascadia Code', Consolas, monospace;
 
-  --color-accent: #6366f1;
-  --color-accent-hover: #4f46e5;
+  --color-canvas: var(--canvas);
+  --color-card: var(--card);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
 
-  --color-surface: #f9fafb;
-  --color-surface-dark: #1f2937;
+  /* The soft lift every card has: `shadow-card`. */
+  --shadow-card: 0 1px 2px rgb(28 27 25 / 0.04), 0 10px 28px -14px rgb(28 27 25 / 0.14);
 }
 
 /* ── Base layer: bare-element defaults ── */
 @layer base {
-  body {
-    @apply text-gray-600 bg-white antialiased;
+  html {
+    color-scheme: light dark;
   }
 
-  @media (prefers-color-scheme: dark) {
-    body {
-      @apply text-gray-400 bg-gray-900;
-    }
+  body {
+    @apply bg-canvas text-ink antialiased;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
   }
 }

@@ -28,14 +28,19 @@ The app deploys from its own GitHub repository through Cloudflare Pages: pushing
 
 ```
 src/
-  components/ui/    # Reusable UI components (Button.vue is a sample to copy from)
-  lib/              # Service layer (Supabase client, db access, HTTP API client)
+  components/
+    layout/AppShell.vue  # The sidebar (wide) / top bar (narrow) around every page; its NAV list
+    ui/             # Reusable UI components (Button.vue is a sample to copy from)
+  lib/              # Service layer (Supabase client, db access, HTTP API client); app.ts holds APP_NAME
   router/           # Vue Router with auth guards
   stores/           # Pinia stores (auth)
   styles/
     theme.css       # Tailwind import + theme customization (single file)
-  views/            # Page-level components
+  views/            # Page-level components: Home (public, a stand-in start page to replace),
+                    # Account (the pattern for a private page), Login
 ```
+
+Icons come from `@lucide/vue` (`import { House } from '@lucide/vue'`, then `<House class="size-5" :stroke-width="1.75" />`). Don't add a second icon set.
 
 Imports use the `@/` path alias, which maps to `src/`. Always prefer `import x from '@/lib/x'` over `import x from '../../lib/x'`.
 
@@ -55,10 +60,10 @@ Imports use the `@/` path alias, which maps to `src/`. Always prefer `import x f
 **All styling uses Tailwind utility classes applied directly in templates.**
 
 - The single theme file is `src/styles/theme.css`. It contains the Tailwind import, `@theme` overrides (fonts, brand colors, custom tokens), and `@layer base` defaults.
-- To change the brand color, fonts, or add custom design tokens, edit the `@theme` block in `theme.css`.
-- Use Tailwind classes in templates: `class="flex items-center gap-4 text-sm text-gray-500"`.
-- Use the custom theme colors via Tailwind: `bg-accent`, `text-accent`, `hover:bg-accent-hover`, etc.
-- For dark mode, use the `dark:` variant: `class="text-gray-900 dark:text-gray-100"`.
+- Colours are **semantic tokens**, each with a light and a dark value in `theme.css` (`:root` and its `prefers-color-scheme: dark` block): `bg-canvas` (the page), `bg-card` + `shadow-card` (raised surfaces), `bg-sunken` (wells, hovered rows, tracks), `text-ink` (text), `text-muted` (secondary text), `text-faint` (hints), `border-line` (hairlines), `bg-accent` / `text-accent` / `hover:bg-accent-hover` / `bg-accent-soft` / `text-accent-ink` (the brand colour), `text-danger` / `bg-danger-soft`, `text-success` / `bg-success-soft`.
+- Use them in templates: `class="flex items-center gap-4 text-sm text-muted"`. Because every token already has its dark value, **you don't write `dark:` for colours**.
+- **Never use Tailwind's `gray-*`, `slate-*`, `zinc-*`, `neutral-*` (or any raw palette colour) in a view.** Need a new shade? Add a token to `theme.css` with both values.
+- To change the brand colour or fonts, edit the values in `theme.css`; the whole app follows.
 - Use `<style scoped>` sparingly -- only for complex component-specific layout that would be unwieldy as utility classes.
 - NEVER create additional top-level CSS files. All theme customization goes in `theme.css`.
 - NEVER hardcode colors or spacing outside of `theme.css`. If you need a new reusable value, add it to the `@theme` block.

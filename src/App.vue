@@ -6,59 +6,49 @@ const auth = useAuthStore()
 </script>
 
 <template>
-  <div v-if="!supabaseConfigured" class="flex items-center justify-center min-h-screen p-6">
-    <div class="max-w-md w-full text-center">
-      <div
-        class="w-12 h-12 mx-auto mb-5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-2xl font-bold flex items-center justify-center"
-      >
-        !
-      </div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-        Supabase Not Configured
-      </h1>
-      <p class="text-gray-500 mb-6">
-        The app can't connect to Supabase. Set the following environment variables to get started:
-      </p>
-      <div class="flex flex-col items-center gap-2 mb-6">
-        <code
-          class="px-3 py-1.5 rounded-md text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
+  <div v-if="!supabaseConfigured" class="flex min-h-screen items-center justify-center p-6">
+    <div class="w-full max-w-md rounded-2xl bg-card p-7 shadow-card">
+      <h1 class="mb-2 text-xl font-semibold tracking-tight">Supabase isn't set up yet</h1>
+      <p class="mb-5 text-sm leading-relaxed text-muted">
+        The app needs two values in its
+        <code class="rounded-md border border-line bg-card px-2 py-1 font-mono text-xs text-ink"
+          >.env</code
+        >
+        file to reach your database:
+        <code class="rounded-md border border-line bg-card px-2 py-1 font-mono text-xs text-ink"
           >VITE_SUPABASE_URL</code
         >
-        <code
-          class="px-3 py-1.5 rounded-md text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
+        and
+        <code class="rounded-md border border-line bg-card px-2 py-1 font-mono text-xs text-ink"
           >VITE_SUPABASE_PUBLISHABLE_KEY</code
-        >
-      </div>
-      <div
-        class="text-left border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col gap-3 text-sm"
-      >
-        <p>
-          <strong>1.</strong> Copy
-          <code
-            class="px-1.5 py-0.5 rounded bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs"
+        >.
+      </p>
+      <ol class="flex list-decimal flex-col gap-2 pl-5 text-sm text-muted">
+        <li>
+          Copy
+          <code class="rounded-md border border-line bg-card px-2 py-1 font-mono text-xs text-ink"
             >.env.example</code
           >
           to
-          <code
-            class="px-1.5 py-0.5 rounded bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs"
+          <code class="rounded-md border border-line bg-card px-2 py-1 font-mono text-xs text-ink"
             >.env</code
           >
-        </p>
-        <p><strong>2.</strong> Fill in your Supabase project URL and publishable key</p>
-        <p><strong>3.</strong> Restart the dev server</p>
-      </div>
+        </li>
+        <li>Fill in your Supabase project's URL and publishable key</li>
+        <li>Restart the dev server</li>
+      </ol>
     </div>
   </div>
 
   <div
     v-else-if="auth.loading"
-    class="flex items-center justify-center min-h-screen"
+    class="flex min-h-screen items-center justify-center"
     role="status"
     aria-live="polite"
   >
     <span class="sr-only">Loading</span>
     <div
-      class="size-8 rounded-full border-3 border-gray-200 dark:border-gray-700 border-t-accent animate-spin"
+      class="size-7 animate-spin rounded-full border-3 border-line border-t-accent"
       aria-hidden="true"
     />
   </div>
@@ -66,14 +56,12 @@ const auth = useAuthStore()
   <div
     v-else-if="auth.initError"
     role="alert"
-    class="flex items-center justify-center min-h-screen p-6"
+    class="flex min-h-screen items-center justify-center p-6"
   >
-    <div class="max-w-md w-full text-center">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-        Couldn't load your session
-      </h1>
-      <p class="text-gray-500 mb-4">{{ auth.initError }}</p>
-      <p class="text-gray-500 text-sm">
+    <div class="w-full max-w-md rounded-2xl bg-card p-7 shadow-card">
+      <h1 class="mb-2 text-xl font-semibold tracking-tight">Couldn't load your session</h1>
+      <p class="mb-3 text-sm text-danger">{{ auth.initError }}</p>
+      <p class="text-sm text-muted">
         Check your network connection and Supabase configuration, then refresh the page.
       </p>
     </div>

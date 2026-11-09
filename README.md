@@ -35,7 +35,8 @@ src/
   styles/
     theme.css            # Tailwind import + theme overrides (single file)
   views/
-    Home.vue             # Authenticated homepage
+    Home.vue             # Public stand-in start page (replace it)
+    Account.vue          # Signed-in only: the pattern for a private page
     Login.vue            # Login / signup page
   App.vue
   main.ts

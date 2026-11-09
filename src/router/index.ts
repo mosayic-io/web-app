@@ -2,9 +2,14 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
+import Account from '@/views/Account.vue'
 
+// Home is open to everyone, so the app shows something the first time it
+// runs, even before the database is set up. Account is the pattern for a
+// private page: requiresAuth sends a signed-out visitor to /login.
 const routes: RouteRecordRaw[] = [
-  { path: '/', component: Home, meta: { requiresAuth: true } },
+  { path: '/', component: Home },
+  { path: '/account', component: Account, meta: { requiresAuth: true } },
   { path: '/login', component: Login, meta: { guestOnly: true } },
 ]
 
